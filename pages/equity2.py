@@ -147,8 +147,20 @@ with col_chart:
 with col_text:
     girl_drop = ((girls_norm[0] - girls_norm[-1]) / girls_norm[0]) * 100 if girls_norm[0] > 0 else 0
     boy_drop = ((boys_norm[0] - boys_norm[-1]) / boys_norm[0]) * 100 if boys_norm[0] > 0 else 0
-    st.error(f"**Insight:** Female enrollment drops by **{girl_drop:.1f}%** from Primary to Higher Secondary, compared to a **{boy_drop:.1f}%** drop for males. Lack of proper sanitation in higher grades is a known catalyst for this attrition.")
+    # 1. Determine the right words based on the math
+    girl_word = "drops" if girl_drop > 0 else "increases"
+    boy_word = "drop" if boy_drop > 0 else "increase"
 
+    # 2. Build the core sentence using absolute values (removes the minus sign)
+    insight_text = f"**Insight:** Female enrollment {girl_word} by **{abs(girl_drop):.1f}%** from Primary to Higher Secondary, compared to a **{abs(boy_drop):.1f}%** {boy_word} for males."
+
+    # 3. Apply the right context and color (Red for drops, Green for increases)
+    if girl_drop > 0:
+        insight_text += " Lack of proper sanitation in higher grades is a known catalyst for this attrition."
+        st.error(insight_text)
+    else:
+        insight_text += " This positive retention indicates strong upper-level continuation or incoming migration."
+        st.success(insight_text)
 st.divider()
 
 col_pie, col_bar = st.columns(2)
