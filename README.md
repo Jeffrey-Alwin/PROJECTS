@@ -1,25 +1,41 @@
-# 🏫 Tamil Nadu Educational Equity Engine
+ Tamil Nadu Education Quality & Infrastructure Command Center
+ 
+An end-to-end Educational Analytics dashboard designed to audit, benchmark, and generate remedy plans for the Tamil Nadu school system. This project translates raw UDISE+ government data into actionable policy insights.
 
-A production-grade resource allocation and benchmarking dashboard designed to optimize government funding for schools in Tamil Nadu using UDISE+ open data.
+ Live Demo
+**Access the dashboard here:** https://tn-education-analytics.streamlit.app
 
-## 🚀 Project Overview
-This tool shifts educational data analysis from descriptive statistics to prescriptive analytics. It calculates a custom **Multivariate Goodness/Priority Score** for schools, enabling policymakers to dynamically identify critical infrastructure gaps and automatically generate resource allocation remedies.
+---
 
-### Key Features
-* **Macro-Analytics (State-Wide):** Tracks foundational government mandates (RTE Pupil-Teacher Ratios, basic utility access).
-* **Micro-Analytics (School-Level):** A search-based allocator that calculates exact numerical remedies (e.g., "Allocate 3 Teachers," "Build 2 Toilets") based on current enrollment.
-* **Category Benchmarking:** Interactive Plotly visualizations comparing feature-wise adequacy across Government, Private, and Aided institutions.
+ Project Overview
+This Command Center serves as a "Digital Auditor" for the state education department. It moves beyond simple spreadsheets to identify critical failure points in regional infrastructure, gender equity, and educator workforce stability.
 
-## 🛠️ Technical Architecture
-* **Language:** Python
-* **Data Engineering:** Pandas, Scikit-Learn (MinMax Scaling, Composite Indexing)
-* **Frontend/Deployment:** Streamlit Multipage Application (MPA)
-* **Visualizations:** Plotly Express
+Key Analytical Modules:
+* **Home:** Statewide KPI tracking for electricity, water, sanitation, and pucca building compliance.
+* **Comparison:** Cascading regional filters to compare local school systems against statewide averages.
+* **Gender Equity & Sanitation:** Normalized enrollment attrition analysis and tracking of the "Pipeline Drop-off" from Primary to Higher Secondary.
+* **Teacher Command Center:** A "Working Conditions Index" that calculates educator stress based on PTR, isolation, and administrative burdens.
+* **Remedies:** Generates school-specific PDF/CSV intervention plans for local administrators.
 
-## 🧠 The Mathematics (Scoring Logic)
-The engine calculates "Need Ratios" (Students per Resource), normalizes them to resolve magnitude discrepancies using Min-Max scaling, and applies a weighted formula to calculate an overall `Goodness Score` (0.0 to 1.0) and `Priority Score`.
+---
 
-## 💻 How to Run Locally
-1. Clone the repository: `git clone <your-repo-link>`
-2. Install dependencies: `pip install -r requirements.txt`
-3. Launch the app: `streamlit run app.py`
+Tech Stack
+Frontend & UI: [Streamlit](https://streamlit.io/) (Python-based web framework)
+Data Processing: [Pandas](https://pandas.pydata.org/) & [NumPy](https://numpy.org/) (Vectorized performance optimization)
+Visualizations: [ECharts](https://echarts.apache.org/) (High-performance animated charts via `streamlit-echarts`) and [Plotly Express](https://plotly.com/python/) (Complex statistical distributions)
+Animation: [LottieFiles](https://lottiefiles.com/) (Interactive UI vectors)
+
+---
+
+Data Science Highlights
+Performance Optimization: Utilized NumPy vectorization to replace slow Pandas `.apply()` loops, resulting in sub-100ms processing for 58,000+ records.
+Statistical Integrity: Implemented True Regional PTR (Pupil-Teacher Ratio) calculations to avoid the "Mean of Ratios" fallacy.
+Responsive UI: Developed custom HTML/JS animated metric cards that provide a premium SaaS-like feel within a Python environment.
+Normalization: Normalized enrollment data across grade spans (Primary vs. Higher Secondary) to reveal true attrition rates regardless of school size.
+
+---
+
+Installation & Local Setup
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/Jeffrey-Alwin/PROJECTS.git](https://github.com/Jeffrey-Alwin/PROJECTS.git)
