@@ -275,3 +275,58 @@ else:
                 st.info("No Rural/Urban data available for this specific selection.")
         else:
             st.info("Rural/Urban demographic data is not currently mapped in the dataset.")
+
+
+with st.expander("The Data Translator: What is this actually telling us?", expanded=True):
+    st.markdown("<h3 style='margin-bottom: 0; color: #f8fafc;'>Shattering Regional Assumptions</h3>",
+                unsafe_allow_html=True)
+    st.write(
+        "Averages lie. Here is what the benchmarking data reveals when we look past the high-level district scores.")
+    st.write("")
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.info("**Myth:** *A 'Good' district means all schools in that region are doing well.*",
+                icon=":material/equalizer:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #60a5fa; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>Infrastructure Equity (Box Plot)</b>. Even top-performing districts have massive internal inequality between their rural and urban clusters.
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Urban center schools inflate the district's average score, completely masking the severe deficits and failing compliance scores in isolated rural blocks right next door.
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.warning("**Myth:** *Infrastructure upgrades are just about buildings and desks.*",
+                   icon=":material/edit_road:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #fbbf24; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>Geographic Isolation Alert</b>. A school without an all-weather approachable road is structurally cut off from the state's supply chains.
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Geographic marginalization. You cannot fix a broken classroom or deliver mid-day meal supplies if construction trucks and delivery vehicles physically cannot reach the campus.
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.error("**Myth:** *We should distribute repair funds equally across all schools.*", icon=":material/gite:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #f87171; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>Bottom 50 Critical Needs</b> roster and the <b>Radar Chart</b>. Systemic failure is highly concentrated in specific entitlement areas (like Internet or Drinking Water).
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            The "Peanut Butter Approach." Spreading budgets equally is inefficient. Capital must be disproportionately targeted at the bottom 10% of schools to achieve basic human dignity.
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div style="background: linear-gradient(90deg, #1e293b 0%, #334155 100%); padding: 20px; border-radius: 10px; color: white; text-align: center; margin-top: 20px; margin-bottom: 5px; border: 1px solid #475569;">
+            <h4 style="color: #38bdf8; margin: 0; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.95rem;">The Ultimate Takeaway</h4>
+            <p style="margin: 10px 0 0 0; font-size: 1.05rem;">True equity isn't about raising the state average. It is about identifying the extreme outliers hidden within a "good" district and ensuring basic compliance isn't dictated by a student's zip code.</p>
+        </div>
+    """, unsafe_allow_html=True)

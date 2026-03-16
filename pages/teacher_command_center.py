@@ -7,10 +7,10 @@ import streamlit.components.v1 as components
 from streamlit_lottie import st_lottie
 from utils import load_and_prep_data, render_navbar
 
-st.set_page_config(page_title="Teacher Center", page_icon="🧑‍🏫", layout="wide")
+# Cleaned page icon
+st.set_page_config(page_title="Teacher Center", page_icon="💼", layout="wide")
 
 render_navbar()
-
 
 
 @st.cache_data
@@ -25,51 +25,40 @@ lottie_teacher = load_lottieurl("https://lottie.host/7e0de9d5-78ef-410a-85d7-393
 df = load_and_prep_data()
 
 
-
 def calculate_comfort_score(row):
     score = 100
-
 
     tch = row.get('total_tch', 0)
     students = row.get('total_students', 0)
     if tch <= 1 and students > 0: score -= 20
 
-
     if row.get('classrooms_needs_major_repair', 0) > 0: score -= 15
-
 
     if row.get('electricity') != 1 or row.get('drinking_water') != 1 or row.get('functional_toilets', 1) == 0:
         score -= 15
 
-
     if row.get('ptr', 0) > 30: score -= 15
-
 
     if row.get('approachable_road', 1) != 1: score -= 10
 
-
     if row.get('teacher_involve_non_training_assignment', 0) > 0: score -= 10
 
-    # BUG FIX 3: Bulletproof Booleans for Admin neglect
     if row.get('active_smc') != 1: score -= 10
     if row.get('funds_utilized') != 1: score -= 5
 
     return max(0, score)
 
 
-
 df['teacher_comfort_score'] = df.apply(calculate_comfort_score, axis=1)
-
 
 c1, c2 = st.columns([4, 1])
 with c1:
-    st.title("🧑‍🏫 Educator Workforce Analytics")
+    st.title("Educator Workforce Analytics")
     st.write("Analyzing staff allocations, contractual reliance, digital readiness, and working conditions.")
 with c2:
     if lottie_teacher: st_lottie(lottie_teacher, height=120, key="tch_anim")
 
 st.divider()
-
 
 st.write("##### Target Workforce Filters")
 col1, col2, col3 = st.columns(3)
@@ -93,11 +82,10 @@ with col3:
 target_df = block_df.copy() if selected_mgmt == 'All Managements' else block_df[block_df['management'] == selected_mgmt]
 
 if target_df.empty:
-    st.warning("No schools found matching these filters.")
+    st.warning("No schools found matching these filters.", icon=":material/warning:")
     st.stop()
 
 location_text = selected_district if selected_block == 'All Blocks' else f"{selected_block}, {selected_district}"
-
 
 if selected_district == 'Statewide (All Districts)':
     group_col = 'district'
@@ -107,13 +95,15 @@ else:
     group_col = 'school_name'
 
 
-
-def animated_metric_card(label, value, color, icon, suffix=""):
+def animated_metric_card(label, value, color, material_icon, suffix=""):
     safe_id = re.sub(r'[^a-zA-Z0-9]', '_', label)
     is_float = isinstance(value, float)
+
+    # Injected Google Material Symbols stylesheet
     html = f"""
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <div style="background: white; padding: 20px; border-radius: 12px; border-bottom: 4px solid {color}; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="font-size: 30px; margin-bottom: 5px;">{icon}</div>
+        <span class="material-symbols-outlined" style="font-size: 36px; color: {color}; margin-bottom: 5px; display: block;">{material_icon}</span>
         <div style="font-size: 32px; font-weight: 800; color: #1e293b;"><span id="n-{safe_id}">0</span>{suffix}</div>
         <div style="font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase;">{label}</div>
     </div>
@@ -133,8 +123,7 @@ def animated_metric_card(label, value, color, icon, suffix=""):
         requestAnimationFrame(animate);
     </script>
     """
-    components.html(html, height=160)
-
+    components.html(html, height=170)
 
 
 total_teachers = target_df['total_tch'].sum()
@@ -142,20 +131,20 @@ total_students = target_df['total_students'].sum()
 contract_pct = (target_df['contract'].sum() / total_teachers * 100) if total_teachers > 0 else 0
 avg_comfort = target_df['teacher_comfort_score'].mean()
 
-
 avg_ptr = (total_students / total_teachers) if total_teachers > 0 else 0
 
-st.write(f"##### 📊 Workforce Baseline: {selected_mgmt} in {location_text}")
+st.write(f"##### Workforce Baseline: {selected_mgmt} in {location_text}")
 m1, m2, m3, m4 = st.columns(4)
-with m1: animated_metric_card("Total Teaching Staff", int(total_teachers), "#3b82f6", "👨‍🏫")
-with m2: animated_metric_card("True Regional PTR", round(avg_ptr, 1), "#10b981", "⚖️", ":1")
-with m3: animated_metric_card("Contractual Reliance", round(contract_pct, 1), "#f59e0b", "📑", "%")
-with m4: animated_metric_card("Avg Environment Score", round(avg_comfort, 1), "#8b5cf6", "🌡️", "/100")
+
+# Replaced emojis with sharp Google Material Vector names
+with m1: animated_metric_card("Total Teaching Staff", int(total_teachers), "#3b82f6", "groups")
+with m2: animated_metric_card("True Regional PTR", round(avg_ptr, 1), "#10b981", "balance", ":1")
+with m3: animated_metric_card("Contractual Reliance", round(contract_pct, 1), "#f59e0b", "history_edu", "%")
+with m4: animated_metric_card("Avg Environment Score", round(avg_comfort, 1), "#8b5cf6", "thermostat", "/100")
 
 st.divider()
 
-
-st.write("##### 🌡️ The Working Conditions Index")
+st.write("##### The Working Conditions Index")
 st.write(
     "A custom metric evaluating educator stress based on overcrowding, physical safety, sanitation, and admin burnout.")
 
@@ -235,9 +224,8 @@ st.divider()
 
 col1, col2 = st.columns(2)
 
-
 with col1:
-    st.write(f"##### 🏢 Workforce Stability (by {group_col.title().replace('_', ' ')})")
+    st.write(f"##### Workforce Stability (by {group_col.title().replace('_', ' ')})")
 
     staff_group = target_df.groupby(group_col)[['regular', 'contract', 'total_tch']].sum().reset_index()
     staff_group['contract_ratio'] = staff_group['contract'] / staff_group['total_tch'].replace(0, 1)
@@ -260,12 +248,11 @@ with col1:
     }
     st_echarts(options=bar_options, height="400px")
 
-
 with col2:
-    st.write("##### 💻 The Digital Skill Mismatch")
+    st.write("##### The Digital Skill Mismatch")
 
     trained = target_df['trained_comp'].sum()
-    untrained = max(0, total_teachers - trained)  # Prevents negative numbers if bad data exists
+    untrained = max(0, total_teachers - trained)
 
     doughnut_options = {
         "tooltip": {"trigger": "item", "formatter": "{b}: {c} Teachers ({d}%)"},
@@ -290,9 +277,8 @@ st.divider()
 
 col3, col4 = st.columns(2)
 
-
 with col3:
-    st.write("##### 📋 Extracurricular Admin Burdens")
+    st.write("##### Extracurricular Admin Burdens")
 
     if 'teacher_involve_non_training_assignment' in target_df.columns:
         burnout_df = target_df[target_df['teacher_involve_non_training_assignment'] > 0]
@@ -355,21 +341,21 @@ with col3:
 
             st_echarts(options=heatmap_options, height="400px")
         else:
-            st.success("🎉 No schools reported non-academic staff burdens in this selection!")
+            st.success("No schools reported non-academic staff burdens in this selection!",
+                       icon=":material/check_circle:")
     else:
-        st.info("Non-academic assignment data unavailable.")
-
+        st.info("Non-academic assignment data unavailable.", icon=":material/info:")
 
 with col4:
-    st.write("##### 🚨 The 'Lone Educator' Roster")
-
+    st.write("##### The 'Lone Educator' Roster")
 
     lone_df = target_df[(target_df['total_tch'] <= 1) & (target_df['total_students'] > 0)].copy()
 
     if lone_df.empty:
-        st.success(f"🎉 No critically understaffed schools found in {location_text}.")
+        st.success(f"No critically understaffed schools found in {location_text}.", icon=":material/check_circle:")
     else:
-        st.error(f"**CRITICAL ALARM:** {len(lone_df)} schools operate with 1 or 0 assigned teachers.")
+        st.error(f"**CRITICAL ALARM:** {len(lone_df)} schools operate with 1 or 0 assigned teachers.",
+                 icon=":material/warning:")
 
         if group_col == 'school_name':
             display_cols = ['udise_code', 'school_name', 'total_students', 'total_tch']
@@ -385,3 +371,58 @@ with col4:
         display_df.rename(columns=rename_map, inplace=True)
 
         st.dataframe(display_df.head(50), use_container_width=True, hide_index=True, height=350)
+
+with st.expander("The Data Translator: What is this actually telling us?", expanded=True):
+    st.markdown("<h3 style='margin-bottom: 0; color: #f8fafc;'>Shattering Workforce Assumptions</h3>",
+                unsafe_allow_html=True)
+    st.write(
+        "Academic failure is rarely a pedagogy problem; it is an environment problem. Here is the unvarnished reality of educator working conditions.")
+    st.write("")
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.info("**Myth:** *Poor student test scores are caused by a lack of teacher training.*",
+                icon=":material/psychology:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #60a5fa; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>Working Conditions Index</b>. The highest trained educator in the state cannot effectively teach in a room with no electricity, broken toilets, and 60 students.
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Systemic burnout. When basic physiological and safety needs of the workplace are ignored, teacher absenteeism skyrockets and instructional quality collapses.
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.warning("**Myth:** *We have enough teachers to cover all the state's classrooms.*",
+                   icon=":material/person_off:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #fbbf24; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>'Lone Educator' Roster</b>. Hundreds of schools operate with a single teacher who is forced to manage up to 5 different grade levels simultaneously.
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Severe deployment failures. A single-teacher school guarantees that children receive less than 20% of their legally required instructional time, mathematically ensuring they fall behind.
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.error("**Myth:** *A teacher's only job during the day is to teach students.*",
+                 icon=":material/assignment_late:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #f87171; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>Extracurricular Admin Burdens</b>. Teachers are routinely pulled out of the classroom for non-academic state duties (elections, census, surveys).
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Bureaucratic dumping. The state treats educators as default administrative labor, directly stealing thousands of hours of academic instruction from the students who need it most.
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div style="background: linear-gradient(90deg, #1e293b 0%, #334155 100%); padding: 20px; border-radius: 10px; color: white; text-align: center; margin-top: 20px; margin-bottom: 5px; border: 1px solid #475569;">
+            <h4 style="color: #38bdf8; margin: 0; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.95rem;">The Ultimate Takeaway</h4>
+            <p style="margin: 10px 0 0 0; font-size: 1.05rem;">We cannot hold teachers accountable for 21st-century academic outcomes if we deploy them to 19th-century working conditions while treating them as administrative assistants.</p>
+        </div>
+    """, unsafe_allow_html=True)

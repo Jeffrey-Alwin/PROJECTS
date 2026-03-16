@@ -7,8 +7,8 @@ import streamlit.components.v1 as components
 from streamlit_lottie import st_lottie
 from utils import load_and_prep_data, render_navbar
 
-
-st.set_page_config(page_title="Gender Equity & Sanitation", page_icon="🚺", layout="wide")
+# Cleaned the page icon
+st.set_page_config(page_title="Gender Equity & Sanitation", page_icon="🚻", layout="wide")
 
 render_navbar()
 
@@ -19,17 +19,21 @@ def load_lottieurl(url: str):
     if r.status_code != 200: return None
     return r.json()
 
+
 lottie_equity = load_lottieurl("https://lottie.host/80dc18d8-fb5a-4e20-9118-a6d1dc40b490/CXZP5m2j9M.json")
 
 
-
 def render_kpi_row(kpis):
-    cards_html = ""
+    # Injected Google Material Symbols stylesheet
+    cards_html = """<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />"""
     scripts = ""
     for i, kpi in enumerate(kpis):
         safe_val = float(kpi['value']) if pd.notna(kpi['value']) else 0.0
+        icon_name = kpi.get('icon', 'info')
+
         cards_html += f"""
-        <div style="flex: 1; min-width: 200px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid {kpi['color']}; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="flex: 1; min-width: 200px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid {kpi['color']}; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+            <span class="material-symbols-outlined" style="font-size: 28px; color: {kpi['color']}; margin-bottom: 8px; display: block;">{icon_name}</span>
             <span style="color: #64748b; font-size: 14px; font-weight: 700; text-transform: uppercase;">{kpi['label']}</span><br>
             <span id="c-{i}" style="font-size: 32px; font-weight: 900; color: {kpi['color']};">0</span><span style="font-size: 20px; font-weight: 700; color: {kpi['color']};">{kpi.get('suffix', '')}</span>
         </div>
@@ -48,7 +52,7 @@ def render_kpi_row(kpis):
                 if(p < 1) requestAnimationFrame(animate_{i}); else el_{i}.innerText = (target_{i} % 1 !== 0) ? target_{i}.toFixed(1) : target_{i}.toLocaleString();
             }};
             requestAnimationFrame(animate_{i});
-        }}, 50); // slight delay ensures DOM is ready
+        }}, 50);
         """
 
     full_html = f"""
@@ -59,12 +63,11 @@ def render_kpi_row(kpis):
         {scripts}
     </script>
     """
-    components.html(full_html, height=120)
+    components.html(full_html, height=150)
 
 
 # Load Data
 df = load_and_prep_data()
-
 
 df['girls_per_toilet'] = np.where(
     df['toilet_girls'] > 0,
@@ -73,41 +76,41 @@ df['girls_per_toilet'] = np.where(
 )
 df['critical_sanitation'] = df['girls_per_toilet'] > 40
 
-
-
 c1, c2 = st.columns([4, 1])
 with c1:
-    st.title("🚺 Gender Equity & Sanitation Audit")
-    st.write("Tracking the correlation between female sanitation infrastructure, special needs inclusion, and middle-to-high school dropout rates.")
+    st.title("Gender Equity & Sanitation Audit")
+    st.write(
+        "Tracking the correlation between female sanitation infrastructure, special needs inclusion, and middle-to-high school dropout rates.")
 with c2:
     if lottie_equity: st_lottie(lottie_equity, height=100, key="eq_anim")
 
 st.divider()
 
-
-
-st.write("##### 🚨 Statewide Risk Profile")
+st.write("##### Statewide Risk Profile")
 
 valid_ratios = df[df['toilet_girls'] > 0]['girls_per_toilet']
 avg_ratio = valid_ratios.mean() if not valid_ratios.empty else 0
 
+# Added Material Icons to the KPI array
 kpi_data = [
-    {"label": "Total Female Enrollment", "value": df['total_girls'].sum(), "color": "#d946ef", "suffix": ""},
-    {"label": "Zero Girls Toilets (Active)", "value": len(df[(df['toilet_girls'] == 0) & (df['total_girls'] > 0)]), "color": "#ef4444", "suffix": ""},
-    {"label": "RTE Violations (>40:1 Ratio)", "value": len(df[df['critical_sanitation']]), "color": "#f97316", "suffix": ""},
-    {"label": "State Avg Girls/Toilet", "value": avg_ratio, "color": "#8b5cf6", "suffix": ":1"}
+    {"label": "Total Female Enrollment", "value": df['total_girls'].sum(), "color": "#d946ef", "suffix": "",
+     "icon": "girl"},
+    {"label": "Zero Girls Toilets (Active)", "value": len(df[(df['toilet_girls'] == 0) & (df['total_girls'] > 0)]),
+     "color": "#ef4444", "suffix": "", "icon": "not_accessible"},
+    {"label": "RTE Violations (>40:1 Ratio)", "value": len(df[df['critical_sanitation']]), "color": "#f97316",
+     "suffix": "", "icon": "warning"},
+    {"label": "State Avg Girls/Toilet", "value": avg_ratio, "color": "#8b5cf6", "suffix": ":1", "icon": "wc"}
 ]
 
 render_kpi_row(kpi_data)
 
 st.divider()
 
-
-
-st.write("##### 📉 The Pipeline Drop-off: Normalized Enrollment Attrition")
+st.write("##### The Pipeline Drop-off: Normalized Enrollment Attrition")
 st.write("Normalized by dividing stage totals by the number of grades to reveal true dropout velocity.")
 
-raw_girls = [df['primary_girls'].sum(), df['middle_girls'].sum(), df['high_girls'].sum(), df['higher_secondary_girls'].sum()]
+raw_girls = [df['primary_girls'].sum(), df['middle_girls'].sum(), df['high_girls'].sum(),
+             df['higher_secondary_girls'].sum()]
 raw_boys = [df['primary_boys'].sum(), df['middle_boys'].sum(), df['high_boys'].sum(), df['higher_secondary_boys'].sum()]
 norm_factors = [5, 3, 2, 2]
 
@@ -146,30 +149,30 @@ with col_chart:
 with col_text:
     girl_drop = ((girls_norm[0] - girls_norm[-1]) / girls_norm[0]) * 100 if girls_norm[0] > 0 else 0
     boy_drop = ((boys_norm[0] - boys_norm[-1]) / boys_norm[0]) * 100 if boys_norm[0] > 0 else 0
-    # 1. Determine the right words based on the math
+
     girl_word = "drops" if girl_drop > 0 else "increases"
     boy_word = "drop" if boy_drop > 0 else "increase"
 
-    # 2. Build the core sentence using absolute values (removes the minus sign)
     insight_text = f"**Insight:** Female enrollment {girl_word} by **{abs(girl_drop):.1f}%** from Primary to Higher Secondary, compared to a **{abs(boy_drop):.1f}%** {boy_word} for males."
 
-    # 3. Apply the right context and color (Red for drops, Green for increases)
     if girl_drop > 0:
         insight_text += " Lack of proper sanitation in higher grades is a known catalyst for this attrition."
-        st.error(insight_text)
+        st.error(insight_text, icon=":material/trending_down:")
     else:
         insight_text += " This positive retention indicates strong upper-level continuation or incoming migration."
-        st.success(insight_text)
+        st.success(insight_text, icon=":material/trending_up:")
+
 st.divider()
 
 col_pie, col_bar = st.columns(2)
 
 with col_pie:
-    st.write("##### ⚖️ Statewide Sanitation Severity")
+    st.write("##### Statewide Sanitation Severity")
 
     schools_with_girls = df[df['total_girls'] > 0]
     compliant = len(schools_with_girls[schools_with_girls['girls_per_toilet'] <= 40])
-    crisis = len(schools_with_girls[(schools_with_girls['girls_per_toilet'] > 40) & (schools_with_girls['girls_per_toilet'] < 999)])
+    crisis = len(schools_with_girls[
+                     (schools_with_girls['girls_per_toilet'] > 40) & (schools_with_girls['girls_per_toilet'] < 999)])
     no_toilets = len(schools_with_girls[schools_with_girls['girls_per_toilet'] == 999])
 
     pie_options = {
@@ -190,16 +193,18 @@ with col_pie:
     st_echarts(options=pie_options, height="350px")
 
 with col_bar:
-    st.write("##### ♿ CWSN Negligence by Management")
+    st.write("##### CWSN Negligence by Management")
 
     cwsn_df = df[(df['total_girls'] > 0) & (df['func_girls_cwsn_friendly'] != 1)]
-    cwsn_mgmt = cwsn_df.groupby('management').size().reset_index(name='count').sort_values('count', ascending=True).tail(7)
+    cwsn_mgmt = cwsn_df.groupby('management').size().reset_index(name='count').sort_values('count',
+                                                                                           ascending=True).tail(7)
 
     bar_options = {
         "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
         "grid": {"left": "3%", "right": "10%", "bottom": "10%", "top": "5%", "containLabel": True},
         "xAxis": {"type": "value", "splitLine": {"show": False}},
-        "yAxis": {"type": "category", "data": cwsn_mgmt['management'].tolist(), "axisLabel": {"fontWeight": "bold", "color": "#475569"}},
+        "yAxis": {"type": "category", "data": cwsn_mgmt['management'].tolist(),
+                  "axisLabel": {"fontWeight": "bold", "color": "#475569"}},
         "series": [{
             "name": "Schools Missing CWSN Toilets", "type": "bar", "data": cwsn_mgmt['count'].tolist(),
             "label": {"show": True, "position": "right", "color": "#8b5cf6", "fontWeight": "bold"},
@@ -211,10 +216,9 @@ with col_bar:
 
 st.divider()
 
-
-
-st.write("##### 🌍 The Geographic Divide: Rural vs. Urban Equity")
-st.write("Does a student's location dictate their resources? Comparing overcrowding and infrastructure across geographies.")
+st.write("##### The Geographic Divide: Rural vs. Urban Equity")
+st.write(
+    "Does a student's location dictate their resources? Comparing overcrowding and infrastructure across geographies.")
 
 if 'rural_urban' in df.columns:
     geo_df = df.copy()
@@ -231,15 +235,12 @@ if 'rural_urban' in df.columns:
 
             ptr_df = geo_clean[geo_clean['ptr'] > 0].copy()
 
-
             bins = [0, 30, 40, 60, 9999]
             labels = ['Compliant (≤30)', 'Overcrowded (31-40)', 'Severe (41-60)', 'Crisis (>60)']
             ptr_df['Severity'] = pd.cut(ptr_df['ptr'], bins=bins, labels=labels)
 
-
             severity_counts = ptr_df.groupby(['Geography', 'Severity']).size().unstack(fill_value=0)
             geographies = severity_counts.index.tolist()
-
 
             colors = ['#10b981', '#f59e0b', '#ef4444', '#7f1d1d']
             series_data = []
@@ -255,7 +256,6 @@ if 'rural_urban' in df.columns:
                         "animationDuration": 2000,
                         "animationEasing": "elasticOut"
                     })
-
 
             bar_options = {
                 "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
@@ -281,6 +281,7 @@ if 'rural_urban' in df.columns:
             st.write("**The Infrastructure Gap (Radar)**")
             st.write("Visualizing the disparity in basic physical and digital resources.")
 
+
             def get_geo_metrics(geography):
                 subset = geo_clean[geo_clean['Geography'] == geography]
                 if subset.empty: return [0, 0, 0, 0]
@@ -290,6 +291,7 @@ if 'rural_urban' in df.columns:
                     (subset['drinking_water'] == 1).mean() * 100,
                     (subset['building'] == 3).mean() * 100
                 ]
+
 
             rural_metrics = get_geo_metrics('Rural')
             urban_metrics = get_geo_metrics('Urban')
@@ -332,24 +334,80 @@ if 'rural_urban' in df.columns:
             }
             st_echarts(options=radar_options, height="400px")
     else:
-        st.info("Insufficient Rural/Urban data for this selection.")
+        st.info("Insufficient Rural/Urban data for this selection.", icon=":material/info:")
 else:
-    st.info("Rural/Urban demographic column not found in dataset.")
+    st.info("Rural/Urban demographic column not found in dataset.", icon=":material/info:")
 
 st.divider()
 
+st.write("##### Priority Intervention Targets (Top 50 Critical Ratios)")
+st.write(
+    "These schools have female students enrolled but represent the most severe violations of basic sanitation dignity.")
 
+critical_df = df[(df['total_girls'] > 0) & (df['girls_per_toilet'] > 40)].sort_values(by='girls_per_toilet',
+                                                                                      ascending=False)
+show_df = critical_df[
+    ['udise_code', 'school_name', 'district', 'management', 'total_girls', 'toilet_girls', 'girls_per_toilet']].head(
+    50).copy()
 
-st.write("##### 🎯 Priority Intervention Targets (Top 50 Critical Ratios)")
-st.write("These schools have female students enrolled but represent the most severe violations of basic sanitation dignity.")
-
-critical_df = df[(df['total_girls'] > 0) & (df['girls_per_toilet'] > 40)].sort_values(by='girls_per_toilet', ascending=False)
-show_df = critical_df[['udise_code', 'school_name', 'district', 'management', 'total_girls', 'toilet_girls', 'girls_per_toilet']].head(50).copy()
-
-show_df['girls_per_toilet'] = show_df['girls_per_toilet'].apply(lambda x: "🚨 0 Toilets Available" if x == 999 else f"{int(x)}:1")
+# Removed the siren emoji from the dataframe output
+show_df['girls_per_toilet'] = show_df['girls_per_toilet'].apply(
+    lambda x: "CRITICAL: 0 Toilets" if x == 999 else f"{int(x)}:1")
 show_df.rename(
     columns={'udise_code': 'UDISE', 'school_name': 'School Name', 'district': 'District', 'management': 'Management',
              'total_girls': 'Total Girls', 'toilet_girls': 'Girls Toilets', 'girls_per_toilet': 'Current Ratio'},
     inplace=True)
 
 st.dataframe(show_df, use_container_width=True, hide_index=True)
+
+with st.expander("The Data Translator: What is this actually telling us?", expanded=True):
+    st.markdown("<h3 style='margin-bottom: 0; color: #f8fafc;'>Shattering Equity Assumptions</h3>",
+                unsafe_allow_html=True)
+    st.write(
+        "True gender equity is measured in infrastructure, not just enrollment. Here is the unvarnished reality of the state's facilities.")
+    st.write("")
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.info("**Myth:** *If a school has a girls' restroom, it is RTE compliant.*", icon=":material/wc:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #60a5fa; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>Sanitation Severity Pie Chart</b>. Having one toilet for 150 female students is functionally identical to having zero. 
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Administrators often check the "has toilet" box without checking the <i>ratio</i>. Ratios above 40:1 strip basic dignity and directly drive female absenteeism, particularly as students reach puberty.
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c2:
+        st.warning("**Myth:** *Public school infrastructure is universally accessible.*", icon=":material/accessible:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #fbbf24; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>CWSN Negligence Chart</b>. Thousands of schools under top-level management entirely lack CWSN-friendly (Children With Special Needs) facilities for girls.
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Architectural exclusion. A disabled female student cannot attend a school if she cannot use the restroom. This is not an inconvenience; it is a hard barrier to education.
+        </div>
+        """, unsafe_allow_html=True)
+
+    with c3:
+        st.error("**Myth:** *Overcrowded classrooms are an urban population problem.*", icon=":material/groups:")
+        st.markdown("""
+        <div style="margin-top: 15px;">
+            <span style="color: #f87171; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Reality</span><br>
+            Look at the <b>Rural vs. Urban Overcrowding Chart</b>. While urban schools face density issues, the most severe "Crisis (>60:1)" classrooms are often found in rural blocks.
+            <br><br>
+            <span style="color: #94a3b8; font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">The Root Cause</span><br>
+            Teacher deployment failures. Educators frequently migrate to urban centers, leaving rural students packed into unmanageable, critically understaffed classrooms.
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div style="background: linear-gradient(90deg, #1e293b 0%, #334155 100%); padding: 20px; border-radius: 10px; color: white; text-align: center; margin-top: 20px; margin-bottom: 5px; border: 1px solid #475569;">
+            <h4 style="color: #38bdf8; margin: 0; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.95rem;">The Ultimate Takeaway</h4>
+            <p style="margin: 10px 0 0 0; font-size: 1.05rem;">We cannot claim to have achieved "Gender Parity" based solely on enrollment numbers. If the physical infrastructure forces a female or disabled student to stay home, the system has failed them.</p>
+        </div>
+    """, unsafe_allow_html=True)
