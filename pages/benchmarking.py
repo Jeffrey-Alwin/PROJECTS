@@ -11,7 +11,7 @@ from utils import load_and_prep_data, render_navbar
 st.set_page_config(page_title="District Analytics", page_icon="📍", layout="wide")
 render_navbar()
 
-# --- LOTTIE ANIMATION LOADER ---
+
 @st.cache_data
 def load_lottieurl(url: str):
     r = requests.get(url)
@@ -24,7 +24,7 @@ lottie_analytics = load_lottieurl("https://lottie.host/2847da95-00c5-4386-90c7-2
 df = load_and_prep_data()
 
 
-# --- HEADER ---
+
 col_head1, col_head2 = st.columns([4, 1])
 with col_head1:
     st.title(" District & Management Analytics")
@@ -35,7 +35,7 @@ with col_head2:
 
 st.divider()
 
-# --- 1. TRIPLE MASTER FILTERS (CASCADING) ---
+
 st.write("#####  Regional & Management Filters")
 col1, col2, col3 = st.columns(3)
 
@@ -52,20 +52,20 @@ with col2:
 block_df = dist_df.copy() if selected_block == 'All Blocks' else dist_df[dist_df['block'] == selected_block]
 
 with col3:
-    # BUG FIX: Added 'All Managements' to allow true district/block level macro analysis
+
     managements = ['All Managements'] + sorted(block_df['management'].dropna().unique().tolist())
     selected_mgmt = st.selectbox("3. Select Management Type", managements)
 
-# THIS target_df NOW POWERS THE ENTIRE PAGE
+
 target_df = block_df.copy() if selected_mgmt == 'All Managements' else block_df[block_df['management'] == selected_mgmt]
 
 
-# --- 2. THE LIGHTWEIGHT METRICS ENGINE ---
+
 def animated_metric(label, value, suffix="", delta=None):
     safe_id = re.sub(r'[^a-zA-Z0-9]', '_', label)
     is_float = isinstance(value, float)
 
-    # Optional Delta (for the benchmark comparison)
+
     delta_html = ""
     if delta is not None:
         color = "#10b981" if delta >= 0 else "#ef4444"
@@ -98,14 +98,14 @@ def animated_metric(label, value, suffix="", delta=None):
     """
     components.html(html_code, height=160)
 
-# Update Subheader to show Block
+
 location_text = selected_district if selected_block == 'All Blocks' else f"{selected_block}, {selected_district}"
 st.subheader(f"📊 Profile: {selected_mgmt} ({location_text})")
 
 if target_df.empty:
     st.warning("No schools found for this specific District, Block, and Management combination.")
 else:
-    # Calculate the Benchmark Delta
+
     statewide_avg = df['overall_goodness'].mean()
     local_avg = target_df['overall_goodness'].mean()
     benchmark_delta = local_avg - statewide_avg
@@ -120,10 +120,10 @@ else:
 
     st.divider()
 
-    # --- 3. MASSIVE HIGH-PERFORMANCE ECHARTS ---
+
     st.write("##### Compliance Health Profile")
 
-    # BUG FIX: Bulletproof boolean logic and closed the zero-teacher loophole
+
     compliance_data = {
         'Power Grid': (target_df['electricity'] == 1).mean() * 100,
         'Drinking Water': (target_df['drinking_water'] == 1).mean() * 100,
@@ -183,7 +183,7 @@ else:
 
     st.divider()
 
-    # --- 4. THE CLEAN TABS LEADERBOARD ---
+
     st.write("##### 🏫 Local School Rankings")
 
     tab1, tab2 = st.tabs(["🏆 Top 50 Premier Schools", "🚨 Bottom 50 Critical Needs"])
@@ -213,9 +213,7 @@ else:
         st.dataframe(prep_table(bot_50_df), use_container_width=True, hide_index=True, height=400,
                      column_config=table_config)
 
-    # =========================================================================
-    # --- 5. UPDATED MACRO GEOGRAPHIC & DEMOGRAPHIC SECTION (FILTERED) ---
-    # =========================================================================
+
     st.divider()
     st.write(f"##### 🌍Footprints: {selected_mgmt} in {location_text}")
 
@@ -240,7 +238,7 @@ else:
 
     col_mac1, col_mac2 = st.columns([1, 1.5])
 
-    # Isolation Alerts
+
     with col_mac1:
         st.write("**🚧 Geographic Isolation**")
         if 'approachable_road' in target_df.columns:
@@ -257,7 +255,7 @@ else:
         else:
             st.info("Road access data unavailable.")
 
-    # Rural vs Urban Boxplot
+
     with col_mac2:
         st.write("**🏙️ Infrastructure Equity: Rural vs. Urban**")
         if 'rural_urban' in target_df.columns:

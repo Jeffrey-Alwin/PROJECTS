@@ -1,18 +1,14 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import requests
-import re
 import math
+import requests
+import streamlit as st
 from streamlit_lottie import st_lottie
-import streamlit.components.v1 as components
 from utils import load_and_prep_data, render_navbar
 
 st.set_page_config(page_title="Remedies", page_icon="🛠️", layout="wide")
 render_navbar()
 
 
-# --- LOTTIE ANIMATION LOADER ---
+
 @st.cache_data
 def load_lottieurl(url: str):
     r = requests.get(url)
@@ -62,7 +58,6 @@ udise_options = ["Select Option", "All Critical Schools (Batch)"] + sorted(block
 selected_udise = f3.selectbox("3. Select UDISE Code:", udise_options)
 
 
-# --- THE BULLETPROOF REMEDY LOGIC ENGINE ---
 def generate_action_plan(row):
     actions = []
 
@@ -79,7 +74,7 @@ def generate_action_plan(row):
     if row.get('building') != 3: actions.append("🏗️ Upgrade to Pucca Building")
     if row.get('internet') != 1: actions.append("📡 Setup Internet Access")
 
-    # BUG FIX 1: Flawless RTE Staffing Math using math.ceil()
+
     ts = row.get('total_students', 0)
     tch = row.get('total_tch', 0)
     if ts > 0:
@@ -90,13 +85,13 @@ def generate_action_plan(row):
 
     tg, tb = row.get('total_girls', 0), row.get('total_boys', 0)
 
-    # Standard Sanitation
+
     if tg > 0 and (row.get('toilet_girls', 0) == 0 or (tg / max(row.get('toilet_girls', 1), 1) > 40)):
         actions.append("🚺 Construct additional Girls' Toilets")
     if tb > 0 and (row.get('toilet_boys', 0) == 0 or (tb / max(row.get('toilet_boys', 1), 1) > 40)):
         actions.append("🚹 Construct additional Boys' Toilets")
 
-    # BUG FIX 2: CWSN Equity for both genders
+
     if tg > 0 and row.get('func_girls_cwsn_friendly') != 1:
         actions.append("♿ Install CWSN-friendly Girls' Toilet")
     if tb > 0 and row.get('func_boys_cwsn_friendly') != 1:
@@ -105,14 +100,14 @@ def generate_action_plan(row):
     return " | ".join(actions) if actions else "✅ Fully Compliant"
 
 
-# --- RENDER LOGIC ---
+
 if selected_udise == "Select Option":
     st.write("---")
     st.info(
         " **Pro Tip:** Select a specific **UDISE Code** to see a single school, or choose **'All Critical Schools'** to see everything in this block.")
     st.stop()
 
-# Prepare Data
+
 if selected_udise == "All Critical Schools (Batch)":
     target_df = block_df.copy()
     render_trigger = st.button(" Generate All Action Plans for this Block")
@@ -161,7 +156,7 @@ if render_trigger:
                         else:
                             st.warning(task, icon="🔧")
 
-        # Export
+
         csv = critical_df[['udise_code', 'school_name', 'Intervention Plan']].to_csv(index=False).encode('utf-8')
         st.download_button(" Export Action Plan (CSV)", data=csv, file_name=f"Remedy_{selected_udise}.csv",
                            type="primary")

@@ -2,18 +2,17 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
-import re
 from streamlit_echarts import st_echarts
 import streamlit.components.v1 as components
 from streamlit_lottie import st_lottie
 from utils import load_and_prep_data, render_navbar
-import plotly.express as px
+
 
 st.set_page_config(page_title="Gender Equity & Sanitation", page_icon="🚺", layout="wide")
 
 render_navbar()
 
-# --- LOTTIE ANIMATION LOADER ---
+
 @st.cache_data(show_spinner=False)
 def load_lottieurl(url: str):
     r = requests.get(url)
@@ -23,7 +22,7 @@ def load_lottieurl(url: str):
 lottie_equity = load_lottieurl("https://lottie.host/80dc18d8-fb5a-4e20-9118-a6d1dc40b490/CXZP5m2j9M.json")
 
 
-# --- UNIFIED KPI ROW (1 IFRAME INSTEAD OF 4 FOR HIGH PERFORMANCE) ---
+
 def render_kpi_row(kpis):
     cards_html = ""
     scripts = ""
@@ -66,7 +65,7 @@ def render_kpi_row(kpis):
 # Load Data
 df = load_and_prep_data()
 
-# --- ENGINEERING SPECIFIC EQUITY METRICS (VECTORIZED FOR SPEED) ---
+
 df['girls_per_toilet'] = np.where(
     df['toilet_girls'] > 0,
     df['total_girls'] / df['toilet_girls'],
@@ -75,7 +74,7 @@ df['girls_per_toilet'] = np.where(
 df['critical_sanitation'] = df['girls_per_toilet'] > 40
 
 
-# --- HEADER ---
+
 c1, c2 = st.columns([4, 1])
 with c1:
     st.title("🚺 Gender Equity & Sanitation Audit")
@@ -86,7 +85,7 @@ with c2:
 st.divider()
 
 
-# --- TOP LEVEL KPIs ---
+
 st.write("##### 🚨 Statewide Risk Profile")
 
 valid_ratios = df[df['toilet_girls'] > 0]['girls_per_toilet']
@@ -104,7 +103,7 @@ render_kpi_row(kpi_data)
 st.divider()
 
 
-# --- 1. ECHARTS: THE NORMALIZED DROPOUT THESIS ---
+
 st.write("##### 📉 The Pipeline Drop-off: Normalized Enrollment Attrition")
 st.write("Normalized by dividing stage totals by the number of grades to reveal true dropout velocity.")
 
@@ -213,7 +212,7 @@ with col_bar:
 st.divider()
 
 
-# --- THE GEOGRAPHIC DIVIDE: RURAL VS URBAN EQUITY ---
+
 st.write("##### 🌍 The Geographic Divide: Rural vs. Urban Equity")
 st.write("Does a student's location dictate their resources? Comparing overcrowding and infrastructure across geographies.")
 
@@ -232,16 +231,16 @@ if 'rural_urban' in df.columns:
 
             ptr_df = geo_clean[geo_clean['ptr'] > 0].copy()
 
-            # 1. Create strict policy buckets
+
             bins = [0, 30, 40, 60, 9999]
             labels = ['Compliant (≤30)', 'Overcrowded (31-40)', 'Severe (41-60)', 'Crisis (>60)']
             ptr_df['Severity'] = pd.cut(ptr_df['ptr'], bins=bins, labels=labels)
 
-            # 2. Pivot the data so ECharts can read it easily
+
             severity_counts = ptr_df.groupby(['Geography', 'Severity']).size().unstack(fill_value=0)
             geographies = severity_counts.index.tolist()
 
-            # 3. Build the Animated ECharts Series
+
             colors = ['#10b981', '#f59e0b', '#ef4444', '#7f1d1d']
             series_data = []
 
@@ -257,7 +256,7 @@ if 'rural_urban' in df.columns:
                         "animationEasing": "elasticOut"
                     })
 
-            # 4. Compile the ECharts Options
+
             bar_options = {
                 "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
                 "legend": {"bottom": "0%", "textStyle": {"fontWeight": "bold", "color": "#475569"}},
@@ -340,7 +339,7 @@ else:
 st.divider()
 
 
-# --- ACTIONABLE INTERVENTION LIST ---
+
 st.write("##### 🎯 Priority Intervention Targets (Top 50 Critical Ratios)")
 st.write("These schools have female students enrolled but represent the most severe violations of basic sanitation dignity.")
 

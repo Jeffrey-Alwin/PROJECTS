@@ -21,7 +21,7 @@ lottie_tools = load_lottieurl("https://lottie.host/e2d08a54-71eb-47eb-ba04-a6217
 
 def animated_counter(label, value, color="#10b981"):
     safe_id = re.sub(r'[^a-zA-Z0-9]', '_', label)
-    # Safely handle NaNs
+
     safe_value = int(value) if pd.notna(value) else 0
     html_code = f"""
     <div style="font-family: 'Segoe UI', sans-serif; text-align: center; padding: 10px 0; border-radius: 8px; background-color: #f8fafc; border: 1px solid #e2e8f0;">
@@ -58,7 +58,7 @@ with c2:
 
 st.divider()
 
-# --- CASCADING TRIPLE FILTER ENGINE ---
+
 st.write("##### 🎯 Target Filter")
 col1, col2, col3 = st.columns(3)
 
@@ -81,13 +81,13 @@ with col3:
 target_df = block_df.copy() if selected_mgmt == 'All Managements' else block_df[block_df['management'] == selected_mgmt]
 
 
-# --- PROCUREMENT LOGIC (BULLETPROOFED) ---
+
 missing_water = len(target_df[target_df['drinking_water'] != 1])
 missing_power = len(target_df[target_df['electricity'] != 1])
 missing_internet = len(target_df[target_df['internet'] != 1])
 dilapidated_buildings = len(target_df[target_df['building'] != 3])
 
-# BUG FIX 1: Ensure toilets are only ordered if students of that gender actually attend the school
+
 missing_toilets = len(target_df[
     ((target_df['total_boys'] > 0) & (target_df['toilet_boys'] == 0)) |
     ((target_df['total_girls'] > 0) & (target_df['toilet_girls'] == 0))
@@ -105,7 +105,7 @@ with k5: animated_counter("Sanitation Blocks", missing_toilets, "#10b981")
 
 st.divider()
 
-# --- THE EXPANDED SHOPPING LIST GENERATOR ---
+
 st.write("##### 🛒 Generate Specific Work Orders")
 st.write("Export a list of schools requiring specific physical interventions.")
 
@@ -133,19 +133,19 @@ elif order_type == "Structural / Building Upgrades":
     export_df = target_df[target_df['building'] != 3][['udise_code', 'school_name', 'block', 'district', 'total_students']].copy()
     if not export_df.empty: export_df['Item to Procure'] = "Major Civil Works Contract"
 elif order_type == "Sanitation / Toilet Blocks":
-    # BUG FIX 1 (Applied to Export):
+
     export_df = target_df[
         ((target_df['total_boys'] > 0) & (target_df['toilet_boys'] == 0)) |
         ((target_df['total_girls'] > 0) & (target_df['toilet_girls'] == 0))
     ][['udise_code', 'school_name', 'block', 'district', 'total_students']].copy()
     if not export_df.empty: export_df['Item to Procure'] = "1x Standard Sanitation Block"
 elif order_type == "Student Entitlements (Books & Uniforms)":
-    # BUG FIX 3: Safe Boolean Check
+
     export_df = target_df[target_df['entitlements_met'] != 1][
         ['udise_code', 'school_name', 'block', 'district', 'total_students']].copy()
     if not export_df.empty: export_df['Item to Procure'] = "Standard Student Entitlement Kits"
 
-# Display logic with Dynamic Budget Estimation
+
 if not export_df.empty:
     st.dataframe(export_df.sort_values(by='total_students', ascending=False), use_container_width=True, hide_index=True)
 
@@ -158,7 +158,7 @@ if not export_df.empty:
         "Student Entitlements (Books & Uniforms)": 1500
     }
 
-    # BUG FIX 2: Per-Student Math for Entitlements vs Per-School Math for Infrastructure
+
     if order_type == "Student Entitlements (Books & Uniforms)":
         total_students_needing_kits = export_df['total_students'].sum()
         est_budget = total_students_needing_kits * costs.get(order_type, 0)

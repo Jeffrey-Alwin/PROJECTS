@@ -12,7 +12,7 @@ st.set_page_config(page_title="Negligence-Audit", page_icon="👁️", layout="w
 
 render_navbar()
 
-# --- LOTTIE ANIMATION LOADER ---
+
 @st.cache_data
 def load_lottieurl(url: str):
     r = requests.get(url)
@@ -25,7 +25,7 @@ lottie_audit = load_lottieurl("https://lottie.host/9618b04a-4d2b-426c-8509-31e42
 df = load_and_prep_data()
 
 
-# --- HEADER ---
+
 c1, c2 = st.columns([4, 1])
 with c1:
     st.title(" Administrative Accountability Audit")
@@ -35,7 +35,7 @@ with c2:
 
 st.divider()
 
-# --- DUAL MASTER FILTERS ---
+
 st.write("##### Audit Filters")
 f1, f2 = st.columns(2)
 
@@ -54,7 +54,7 @@ if target_df.empty:
     st.stop()
 
 
-# --- DYNAMIC METRICS ENGINE ---
+
 def animated_metric_card(label, value, color, icon, suffix=""):
     safe_id = re.sub(r'[^a-zA-Z0-9]', '_', label)
     is_float = isinstance(value, float)
@@ -83,8 +83,7 @@ def animated_metric_card(label, value, color, icon, suffix=""):
     components.html(html, height=160)
 
 
-# --- BULLETPROOF AUDIT MATH ---
-# 1. Force NaNs to 0 so un-reported expenditure doesn't escape the audit
+
 target_df['safe_receipt'] = pd.to_numeric(target_df['grants_receipt'], errors='coerce').fillna(0)
 target_df['safe_expenditure'] = pd.to_numeric(target_df['grants_expenditure'], errors='coerce').fillna(0)
 
@@ -94,7 +93,7 @@ unspent_df = target_df[(target_df['safe_receipt'] > 0) & (target_df['safe_expend
 unspent_df['wasted_funds'] = unspent_df['safe_receipt'] - unspent_df['safe_expenditure']
 total_wasted = unspent_df['wasted_funds'].sum()
 
-# 2. Strict Type-Safety: Catch False, 0, and NaNs
+
 no_smc = target_df[target_df['active_smc'] != 1]
 avg_insp = target_df['total_inspections'].mean()
 
@@ -109,7 +108,7 @@ st.divider()
 
 col1, col2 = st.columns(2)
 
-# --- 1. ECHARTS: THE GHOST SCHOOL LEADERBOARD ---
+
 with col1:
     ghost_group_col = 'district' if selected_district == 'Statewide (All Districts)' else 'block'
 
@@ -149,7 +148,7 @@ with col1:
         }
         st_echarts(options=ghost_options, height="400px")
 
-# --- 2. ECHARTS: FINANCIAL NEGLIGENCE ROSE CHART ---
+
 with col2:
     fin_group_col = 'management' if selected_mgmt == 'All Managements' else ghost_group_col
 
@@ -188,7 +187,7 @@ with col2:
 
 st.divider()
 
-# --- 3. THE OVERSIGHT QUADRANT ---
+
 st.write("##### ⚖️ Regional Oversight Matrix (Aggregated by Block)")
 st.write("Analyzes the correlation between Local Parent Involvement (SMC) and Government Oversight. *Aggregated at the Block level to ensure rapid, lag-free performance.*")
 
@@ -199,7 +198,7 @@ block_agg = target_df.groupby(['district', 'block']).agg(
     total_schools=('udise_code', 'count')
 ).reset_index()
 
-# Removed the strict <15 filter to ensure high-performing outlier blocks are not deleted from the audit
+
 if block_agg.empty:
     st.info("Insufficient data to generate oversight matrix for this selection.")
 else:
@@ -225,12 +224,12 @@ else:
     fig_scatter.update_layout(margin=dict(l=20, r=20, t=30, b=20), coloraxis_colorbar=dict(title="Score"))
     st.plotly_chart(fig_scatter, use_container_width=True)
 
-# --- 4. EXTREME NEGLIGENCE ROSTER ---
+
 st.divider()
 st.write("##### 🚨 Extreme Negligence Roster")
 st.write("Schools that require major structural repairs, yet have **0 Government Inspections** AND **Failed to utilize their grant money**.")
 
-# 3. Strict Type-Safety: Used != 1 to catch all variations of missing funds_utilized data
+
 extreme_df = target_df[(target_df['total_inspections'] == 0) &
                        (target_df['funds_utilized'] != 1) &
                        (target_df['classrooms_needs_major_repair'] > 0)].copy()

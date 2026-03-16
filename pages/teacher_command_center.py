@@ -12,7 +12,7 @@ st.set_page_config(page_title="Teacher Center", page_icon="🧑‍🏫", layout=
 render_navbar()
 
 
-# --- LOTTIE ANIMATION LOADER ---
+
 @st.cache_data
 def load_lottieurl(url: str):
     r = requests.get(url)
@@ -25,29 +25,29 @@ lottie_teacher = load_lottieurl("https://lottie.host/7e0de9d5-78ef-410a-85d7-393
 df = load_and_prep_data()
 
 
-# --- 🧪 FEATURE ENGINEERING: THE ULTIMATE TEACHER COMFORT SCORE ---
-def calculate_comfort_score(row):
-    score = 100  # Everyone starts with a perfect 100
 
-    # BUG FIX 2: Extreme Isolation now catches BOTH 1-teacher and 0-teacher abandoned schools
+def calculate_comfort_score(row):
+    score = 100
+
+
     tch = row.get('total_tch', 0)
     students = row.get('total_students', 0)
     if tch <= 1 and students > 0: score -= 20
 
-    # 2. Physical Danger (-15 points)
+
     if row.get('classrooms_needs_major_repair', 0) > 0: score -= 15
 
-    # 3. Basic Dignity (-15 points)
+
     if row.get('electricity') != 1 or row.get('drinking_water') != 1 or row.get('functional_toilets', 1) == 0:
         score -= 15
 
-    # 4. Severe Overcrowding (-15 points)
+
     if row.get('ptr', 0) > 30: score -= 15
 
-    # 5. The Commute Hazard (-10 points)
+
     if row.get('approachable_road', 1) != 1: score -= 10
 
-    # 6. Admin Burnout (-10 points)
+
     if row.get('teacher_involve_non_training_assignment', 0) > 0: score -= 10
 
     # BUG FIX 3: Bulletproof Booleans for Admin neglect
@@ -57,10 +57,10 @@ def calculate_comfort_score(row):
     return max(0, score)
 
 
-# Apply the custom metric
+
 df['teacher_comfort_score'] = df.apply(calculate_comfort_score, axis=1)
 
-# --- HEADER ---
+
 c1, c2 = st.columns([4, 1])
 with c1:
     st.title("🧑‍🏫 Educator Workforce Analytics")
@@ -70,7 +70,7 @@ with c2:
 
 st.divider()
 
-# --- CASCADING TRIPLE FILTERS ---
+
 st.write("##### Target Workforce Filters")
 col1, col2, col3 = st.columns(3)
 
@@ -98,7 +98,7 @@ if target_df.empty:
 
 location_text = selected_district if selected_block == 'All Blocks' else f"{selected_block}, {selected_district}"
 
-# THE MAGIC DRILL-DOWN LOGIC
+
 if selected_district == 'Statewide (All Districts)':
     group_col = 'district'
 elif selected_block == 'All Blocks':
@@ -107,7 +107,7 @@ else:
     group_col = 'school_name'
 
 
-# --- DYNAMIC METRICS ENGINE ---
+
 def animated_metric_card(label, value, color, icon, suffix=""):
     safe_id = re.sub(r'[^a-zA-Z0-9]', '_', label)
     is_float = isinstance(value, float)
@@ -136,13 +136,13 @@ def animated_metric_card(label, value, color, icon, suffix=""):
     components.html(html, height=160)
 
 
-# Calculate KPIs
+
 total_teachers = target_df['total_tch'].sum()
 total_students = target_df['total_students'].sum()
 contract_pct = (target_df['contract'].sum() / total_teachers * 100) if total_teachers > 0 else 0
 avg_comfort = target_df['teacher_comfort_score'].mean()
 
-# BUG FIX 1: True mathematical regional PTR
+
 avg_ptr = (total_students / total_teachers) if total_teachers > 0 else 0
 
 st.write(f"##### 📊 Workforce Baseline: {selected_mgmt} in {location_text}")
@@ -154,7 +154,7 @@ with m4: animated_metric_card("Avg Environment Score", round(avg_comfort, 1), "#
 
 st.divider()
 
-# --- THE WORKING CONDITIONS INDEX ---
+
 st.write("##### 🌡️ The Working Conditions Index")
 st.write(
     "A custom metric evaluating educator stress based on overcrowding, physical safety, sanitation, and admin burnout.")
@@ -235,7 +235,7 @@ st.divider()
 
 col1, col2 = st.columns(2)
 
-# --- 1. ECHARTS: WORKFORCE STABILITY ---
+
 with col1:
     st.write(f"##### 🏢 Workforce Stability (by {group_col.title().replace('_', ' ')})")
 
@@ -260,7 +260,7 @@ with col1:
     }
     st_echarts(options=bar_options, height="400px")
 
-# --- 2. ECHARTS: THE DIGITAL MISMATCH ---
+
 with col2:
     st.write("##### 💻 The Digital Skill Mismatch")
 
@@ -290,7 +290,7 @@ st.divider()
 
 col3, col4 = st.columns(2)
 
-# --- 3. THE BURNOUT METRIC (ECHARTS MOSAIC HEATMAP) ---
+
 with col3:
     st.write("##### 📋 Extracurricular Admin Burdens")
 
@@ -359,11 +359,11 @@ with col3:
     else:
         st.info("Non-academic assignment data unavailable.")
 
-# --- 4. THE LONE EDUCATOR ROSTER ---
+
 with col4:
     st.write("##### 🚨 The 'Lone Educator' Roster")
 
-    # BUG FIX 2 (Continued): Catching BOTH zero-teacher and single-teacher crisis scenarios
+
     lone_df = target_df[(target_df['total_tch'] <= 1) & (target_df['total_students'] > 0)].copy()
 
     if lone_df.empty:

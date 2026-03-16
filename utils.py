@@ -3,13 +3,10 @@ import streamlit as st
 import os
 
 
-# 1. ADD show_spinner=False TO SILENCE THE ANNOYING POPUP
+
 @st.cache_data(show_spinner=False)
 def load_and_prep_data():
-    """
-    Loads the pre-compiled, mathematically verified master dataset.
-    Guarantees sub-second load times and uses relative paths for cloud deployment.
-    """
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir, "data", "cleansed", "tamilnadu_ultimate_master.csv")
 
@@ -20,11 +17,11 @@ def load_and_prep_data():
 
     df = pd.read_csv(file_path)
 
-    # 2. MOVE THE TEXT CLEANING HERE (Runs once instead of every click!)
+
     if 'management' in df.columns:
         df['management'] = df['management'].astype(str).str.strip()
 
-    # DATA SAFETY NET
+
     critical_cols = ['building', 'electricity', 'drinking_water', 'internet',
                      'toilet_boys', 'toilet_girls', 'total_boys', 'total_girls',
                      'ptr', 'total_students', 'total_class_rooms']

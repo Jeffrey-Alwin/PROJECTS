@@ -6,18 +6,11 @@ import pandas as pd
 import re
 from utils import load_and_prep_data
 
-# 1. Page Config MUST be the very first command
 st.set_page_config(page_title="TN Education Analytics", page_icon="🏛️", layout="wide")
-
-# ==========================================
-# --- TOP NAVIGATION BAR ---
-# ==========================================
-st.markdown("<br>", unsafe_allow_html=True)  # A little breathing room at the very top
-
-# We now use 7 columns for the 7 pages
+st.markdown("<br>", unsafe_allow_html=True)
 col_nav1, col_nav2, col_nav3, col_nav4, col_nav5, col_nav6, col_nav7 = st.columns(7)
 
-# IMPORTANT: Ensure these file paths exactly match your actual folder structure!
+
 with col_nav1:
     st.page_link("app.py", label="📊 HOME", use_container_width=True)
 with col_nav2:
@@ -36,9 +29,7 @@ with col_nav7:
 st.markdown("<hr style='margin-top: 10px; margin-bottom: 30px;'>", unsafe_allow_html=True)
 
 
-# ==========================================
-# --- MAIN DASHBOARD STARTS HERE ---
-# ==========================================
+
 df = load_and_prep_data()
 total_schools = len(df)
 
@@ -49,7 +40,7 @@ st.markdown(f"<h3 style='text-align: center; color: #4CAF50;'>🏫 Total Schools
             unsafe_allow_html=True)
 st.divider()
 
-# --- 1. STRICT GOVERNMENT MANDATE CALCULATIONS ---
+
 metrics_infra = {
     "Electrified (100%)": int((df['electricity'] == 1).sum()),
     "Safe Drinking Water": int((df['drinking_water'] == 1).sum()),
@@ -59,7 +50,7 @@ metrics_infra = {
     "RTE Teacher Ratio (1:30)": int((df['ptr'] <= 30).sum()),
     "RTE Class Space (1:30)": int(((df['total_students'] / df['total_class_rooms'].replace(0, np.nan)) <= 30).sum()),
 
-    # BULLETPROOF SANITATION MATH: Passes the school if the gender count is 0, OR if the ratio is <= 40
+
     "Girls' Sanitation (1:40)": int(
         ((df['total_girls'] == 0) | ((df['total_girls'] / df['toilet_girls'].replace(0, np.nan)) <= 40)).sum()),
     "Boys' Sanitation (1:40)": int(
@@ -68,7 +59,7 @@ metrics_infra = {
     "Fully Compliant Schools": int((df['violations'] == 0).sum()),
     "Critical Priority (Need Fund)": int((df['violations'] >= 4).sum())
 }
-# GOVERNANCE & FINANCE METRICS
+
 metrics_gov = {
     "Funds Utilized (>80%)": int(df['funds_utilized'].sum()),
     "Active SMC (Parent Board)": int(df['active_smc'].sum()),
@@ -77,7 +68,7 @@ metrics_gov = {
 }
 
 
-# --- 2. BULLETPROOF HTML/JS ANIMATED GAUGE ---
+
 def create_animated_gauge(value, max_value, title):
     safe_id = re.sub(r'[^a-zA-Z0-9]', '_', title)
     safe_value = int(value) if not pd.isna(value) else 0
@@ -149,7 +140,7 @@ def create_animated_gauge(value, max_value, title):
     components.html(html_code, height=220)
 
 
-# --- 3. UI LAYOUT ---
+
 st.subheader("🏗️ Tier 1: Infrastructure & Compliance")
 cols_row1 = st.columns(5)
 keys_row1 = list(metrics_infra.keys())[:5]
@@ -174,7 +165,7 @@ for i, col in enumerate(cols_row3):
 
 st.divider()
 
-# --- 4. EXECUTIVE SUMMARY: RISK DISTRIBUTION & TRIAGE ---
+
 st.write("### 🧭 Executive Triage: The Risk Distribution")
 st.write(
     "Visualizing the disproportionate concentration of critical-priority schools and their exact material deficits.")
